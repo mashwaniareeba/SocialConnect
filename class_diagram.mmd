@@ -1,0 +1,388 @@
+```mermaid
+classDiagram
+    %% Models Package
+    class User {
+        <<abstract>>
+        -String id
+        -String username
+        -String password
+        -String fullName
+        -String email
+        -int age
+        -String bio
+        -String profilePhotoPath
+        -List~String~ followers
+        -List~String~ following
+        -List~String~ postIds
+        +String getUserType()*
+        +boolean canDeleteAnyPost()*
+        +boolean validatePassword(String)
+        +void addFollower(String)
+        +void removeFollower(String)
+        +void follow(String)
+        +void unfollow(String)
+        +boolean isFollowing(String)
+        +void addPost(String)
+        +void removePost(String)
+        +int getPostCount()
+        +int getFollowerCount()
+        +int getFollowingCount()
+    }
+
+    class RegularUser {
+        -boolean isVerified
+        -boolean isPrivateAccount
+        -List~String~ pendingFollowRequests
+        +String getUserType()
+        +boolean canDeleteAnyPost()
+        +boolean isVerified()
+        +void setVerified(boolean)
+        +boolean isPrivateAccount()
+        +void setPrivateAccount(boolean)
+        +void addFollowRequest(String)
+        +void removeFollowRequest(String)
+        +boolean hasPendingRequestFrom(String)
+    }
+
+    class Admin {
+        -List~String~ bannedUserIds
+        +String getUserType()
+        +boolean canDeleteAnyPost()
+        +void banUser(String)
+        +void unbanUser(String)
+        +boolean isUserBanned(String)
+        +List~String~ getBannedUserIds()
+    }
+
+    class Post {
+        <<abstract>>
+        -String id
+        -String authorId
+        -String authorUsername
+        -String authorFullName
+        -long timestamp
+        -ArrayList~String~ likedByUserIds
+        -ArrayList~Comment~ comments
+        +String getPostType()*
+        +String getContent()*
+        +String getDisplayContent()*
+        +String getRelativeTime()
+        +void addLike(String)
+        +void removeLike(String)
+        +boolean isLikedBy(String)
+        +int getLikeCount()
+        +void addComment(Comment)
+        +boolean removeComment(String)
+        +ArrayList~Comment~ getComments()
+        +int getCommentCount()
+    }
+
+    class TextPost {
+        -String textContent
+        +String getPostType()
+        +String getContent()
+        +String getDisplayContent()
+    }
+
+    class ImagePost {
+        -String imagePath
+        -String caption
+        +String getPostType()
+        +String getContent()
+        +String getDisplayContent()
+        +String getImagePath()
+        +String getCaption()
+        +String getImageFileName()
+        +boolean hasCaption()
+    }
+
+    class Comment {
+        -String id
+        -String postId
+        -String authorId
+        -String authorUsername
+        -String authorFullName
+        -String content
+        -long timestamp
+        -ArrayList~String~ likedByUserIds
+        +String getRelativeTime()
+        +void addLike(String)
+        +void removeLike(String)
+        +boolean isLikedBy(String)
+        +int getLikeCount()
+    }
+
+    class VerificationRequest {
+        -String userId
+        -String username
+        -String fullName
+        -String contentFilePath
+        -long timestamp
+        -boolean resolved
+        +String getRelativeTime()
+    }
+
+    class CommentReport {
+        -String reportId
+        -String commentId
+        -String postId
+        -String reporterId
+        -String reporterUsername
+        -String commentAuthorId
+        -String commentAuthorUsername
+        -String commentContent
+        -String reason
+        -long timestamp
+        -boolean resolved
+        +String getRelativeTime()
+    }
+
+    %% System Package
+    class SocialNetworkSystem {
+        -static SocialNetworkSystem instance
+        -ArrayList~User~ users
+        -ArrayList~Post~ posts
+        -User currentUser
+        -int userIdCounter
+        -int postIdCounter
+        -int commentIdCounter
+        -int reportIdCounter
+        -ArrayList~VerificationRequest~ verificationRequests
+        -ArrayList~CommentReport~ commentReports
+        +static SocialNetworkSystem getInstance()
+        +User registerUser(String, String, String, String, int, boolean)
+        +boolean isEmailTaken(String)
+        +User login(String, String)
+        +void logout()
+        +User getCurrentUser()
+        +User getUserById(String)
+        +User getUserByUsername(String)
+        +User getUserByEmail(String)
+        +List~User~ getAllUsers()
+        +List~User~ searchUsers(String)
+        +Post createTextPost(String)
+        +Post createImagePost(String, String)
+        +boolean deletePost(String)
+        +boolean likePost(String)
+        +Comment addComment(String, String)
+        +boolean followUser(String)
+        +boolean requestVerification(String)
+        +boolean verifyUser(String)
+        +boolean reportComment(String, String, String)
+        +void saveData()
+        +boolean loadSavedData()
+    }
+
+    class DataPersistence {
+        +static boolean saveUsers(ArrayList~User~, String)
+        +static boolean savePosts(ArrayList~Post~, String)
+        +static boolean saveVerificationRequests(ArrayList~VerificationRequest~, String)
+        +static boolean saveCommentReports(ArrayList~CommentReport~, String)
+        +static ArrayList~User~ loadUsers(String)
+        +static ArrayList~Post~ loadPosts(String)
+        +static ArrayList~VerificationRequest~ loadVerificationRequests(String)
+        +static ArrayList~CommentReport~ loadCommentReports(String)
+    }
+
+    %% GUI Package - Main Application
+    class MainApplication {
+        -CardLayout cardLayout
+        -JPanel mainPanel
+        -LoginPanel loginPanel
+        -RegistrationPanel registrationPanel
+        -MainAppPanel mainAppPanel
+        -SocialNetworkSystem system
+        +void showLogin()
+        +void showRegister()
+        +void showMainApp()
+    }
+
+    %% GUI Package - Panels
+    class LoginPanel {
+        -ModernTextField usernameField
+        -ModernPasswordField passwordField
+        -ModernButton loginButton
+        -JLabel errorLabel
+        -Runnable onLoginSuccess
+        -Runnable onSwitchToRegister
+        +void setOnLoginSuccess(Runnable)
+        +void setOnSwitchToRegister(Runnable)
+        +void clearFields()
+    }
+
+    class RegistrationPanel {
+        -ModernTextField usernameField
+        -ModernTextField fullNameField
+        -ModernTextField emailField
+        -ModernTextField ageField
+        -ModernPasswordField passwordField
+        -ModernPasswordField confirmPasswordField
+        -ModernButton registerButton
+        -JLabel errorLabel
+        -Runnable onRegistrationSuccess
+        -Runnable onSwitchToLogin
+        +void setOnRegistrationSuccess(Runnable)
+        +void setOnSwitchToLogin(Runnable)
+        +void clearFields()
+        -boolean validateEmail(String)
+    }
+
+    class MainAppPanel {
+        -JPanel sidebar
+        -JPanel contentPanel
+        -FeedPanel feedPanel
+        -CreatePostPanel createPostPanel
+        -ProfilePanel profilePanel
+        -SearchPanel searchPanel
+        -SocialNetworkSystem system
+        -Runnable onLogout
+        +void showPanel(String)
+        +void refreshAll()
+        +void setOnLogout(Runnable)
+    }
+
+    class FeedPanel {
+        -JPanel postsPanel
+        -JScrollPane scrollPane
+        -SocialNetworkSystem system
+        -ProfilePanel profilePanel
+        +void refreshFeed()
+        -JPanel createPostCard(Post)
+        -JLabel createAvatar(User, int)
+    }
+
+    class CreatePostPanel {
+        -ModernTextField textField
+        -JButton imageButton
+        -ModernButton postButton
+        -String selectedImagePath
+        -SocialNetworkSystem system
+        +void refresh()
+    }
+
+    class ProfilePanel {
+        -User displayedUser
+        -JPanel contentPanel
+        -JScrollPane scrollPane
+        -SocialNetworkSystem system
+        +void loadCurrentUserProfile()
+        +void loadUserProfile(User)
+        +void refreshProfile()
+        -JPanel createProfileHeader()
+        -JLabel createProfileAvatar(User, int)
+        -void showEditProfileDialog()
+        -void showVerificationRequestDialog()
+    }
+
+    class SearchPanel {
+        -ModernTextField searchField
+        -JPanel resultsPanel
+        -JScrollPane scrollPane
+        -ProfilePanel profilePanel
+        -SocialNetworkSystem system
+        +void refresh()
+        -void performSearch()
+        -JPanel createUserCard(User)
+        -JLabel createAvatar(User, int)
+    }
+
+    %% GUI Package - Components
+    class ModernButton {
+        -int style
+        -Color normalColor
+        -Color hoverColor
+        -Color pressedColor
+        -Color textColor
+        +static final int STYLE_PRIMARY
+        +static final int STYLE_SECONDARY
+        +static final int STYLE_SUCCESS
+        +static final int STYLE_GHOST
+    }
+
+    class ModernTextField {
+        -String placeholder
+        -boolean isFocused
+    }
+
+    class ModernPasswordField {
+        -String placeholder
+        -boolean isFocused
+        -boolean showPassword
+        +String getActualPassword()
+    }
+
+    class RoundedPanel {
+        -int cornerRadius
+        -Color backgroundColor
+        -boolean hasShadow
+        +void setBackgroundColor(Color)
+    }
+
+    class Theme {
+        <<utility>>
+        +static final Color PRIMARY_BLUE
+        +static final Color SIDEBAR_BUTTON
+        +static final Color CARD_BACKGROUND
+        +static final Font FONT_TITLE
+        +static final Font FONT_BODY
+        +static JPanel createBackgroundPanel()
+    }
+
+    %% Relationships
+    User <|-- RegularUser
+    User <|-- Admin
+    Post <|-- TextPost
+    Post <|-- ImagePost
+    
+    User "1" --> "*" Post : creates
+    Post "1" --> "*" Comment : has
+    User "1" --> "*" Comment : writes
+    User "1" --> "*" VerificationRequest : submits
+    User "1" --> "*" CommentReport : creates
+    
+    SocialNetworkSystem "1" --> "*" User : manages
+    SocialNetworkSystem "1" --> "*" Post : manages
+    SocialNetworkSystem "1" --> "*" VerificationRequest : manages
+    SocialNetworkSystem "1" --> "*" CommentReport : manages
+    SocialNetworkSystem --> DataPersistence : uses
+    
+    MainApplication --> LoginPanel : contains
+    MainApplication --> RegistrationPanel : contains
+    MainApplication --> MainAppPanel : contains
+    MainApplication --> SocialNetworkSystem : uses
+    
+    MainAppPanel --> FeedPanel : contains
+    MainAppPanel --> CreatePostPanel : contains
+    MainAppPanel --> ProfilePanel : contains
+    MainAppPanel --> SearchPanel : contains
+    MainAppPanel --> SocialNetworkSystem : uses
+    
+    FeedPanel --> SocialNetworkSystem : uses
+    FeedPanel --> ProfilePanel : references
+    CreatePostPanel --> SocialNetworkSystem : uses
+    ProfilePanel --> SocialNetworkSystem : uses
+    SearchPanel --> SocialNetworkSystem : uses
+    SearchPanel --> ProfilePanel : references
+    
+    LoginPanel --> SocialNetworkSystem : uses
+    RegistrationPanel --> SocialNetworkSystem : uses
+    
+    LoginPanel --> ModernButton : uses
+    LoginPanel --> ModernTextField : uses
+    LoginPanel --> ModernPasswordField : uses
+    RegistrationPanel --> ModernButton : uses
+    RegistrationPanel --> ModernTextField : uses
+    RegistrationPanel --> ModernPasswordField : uses
+    
+    FeedPanel --> RoundedPanel : uses
+    ProfilePanel --> RoundedPanel : uses
+    SearchPanel --> RoundedPanel : uses
+    
+    MainApplication --> Theme : uses
+    LoginPanel --> Theme : uses
+    RegistrationPanel --> Theme : uses
+    FeedPanel --> Theme : uses
+    ProfilePanel --> Theme : uses
+    SearchPanel --> Theme : uses
+    CreatePostPanel --> Theme : uses
+```

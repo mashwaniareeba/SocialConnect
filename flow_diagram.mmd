@@ -1,0 +1,154 @@
+```mermaid
+flowchart TD
+    Start([Application Start]) --> Init[Initialize SocialNetworkSystem]
+    Init --> LoadData{Load Saved Data?}
+    LoadData -->|Yes| LoadUsers[Load Users from File]
+    LoadData -->|No| InitSample[Initialize Sample Data]
+    LoadUsers --> LoadPosts[Load Posts from File]
+    InitSample --> LoadPosts
+    LoadPosts --> LoadVerification[Load Verification Requests]
+    LoadVerification --> LoadReports[Load Comment Reports]
+    LoadReports --> ShowLogin[Show Login Panel]
+    
+    ShowLogin --> LoginInput[User Enters Credentials]
+    LoginInput --> ValidateLogin{Validate Credentials}
+    ValidateLogin -->|Invalid| ShowError[Show Error Message]
+    ShowError --> LoginInput
+    ValidateLogin -->|Valid| CheckBanned{User Banned?}
+    CheckBanned -->|Yes| ShowBannedError[Show Banned Message]
+    ShowBannedError --> LoginInput
+    CheckBanned -->|No| SetCurrentUser[Set Current User]
+    SetCurrentUser --> ShowMainApp[Show Main Application]
+    
+    ShowLogin --> ClickRegister[User Clicks Register]
+    ClickRegister --> ShowRegister[Show Registration Panel]
+    ShowRegister --> FillForm[User Fills Registration Form]
+    FillForm --> ValidateForm{Validate Form Fields}
+    ValidateForm -->|Invalid| ShowFormError[Show Validation Error]
+    ShowFormError --> FillForm
+    ValidateForm -->|Valid| CheckUsername{Username Exists?}
+    CheckUsername -->|Yes| ShowUsernameError[Show Username Error]
+    ShowUsernameError --> FillForm
+    CheckUsername -->|No| CheckEmail{Email Exists?}
+    CheckEmail -->|Yes| ShowEmailError[Show Email Error]
+    ShowEmailError --> FillForm
+    CheckEmail -->|No| CreateUser[Create New User]
+    CreateUser --> SaveUser[Save User to System]
+    SaveUser --> ShowSuccess[Show Success Message]
+    ShowSuccess --> ShowLogin
+    
+    ShowMainApp --> Sidebar[Display Sidebar Navigation]
+    Sidebar --> FeedNav[Feed Button]
+    Sidebar --> CreateNav[Create Post Button]
+    Sidebar --> ProfileNav[Profile Button]
+    Sidebar --> SearchNav[Search Button]
+    Sidebar --> LogoutNav[Logout Button]
+    
+    FeedNav --> ShowFeed[Show Feed Panel]
+    ShowFeed --> LoadPosts[Load All Posts]
+    LoadPosts --> DisplayPosts[Display Posts in Feed]
+    DisplayPosts --> PostAction{User Action on Post}
+    PostAction -->|Like| ToggleLike[Toggle Like on Post]
+    PostAction -->|Comment| ShowCommentDialog[Show Comment Dialog]
+    PostAction -->|View Profile| LoadUserProfile[Load User Profile]
+    PostAction -->|Delete| CheckDeletePermission{Can Delete?}
+    ToggleLike --> SaveData[Save Data]
+    ShowCommentDialog --> AddComment[Add Comment to Post]
+    AddComment --> SaveData
+    CheckDeletePermission -->|Yes| DeletePost[Delete Post]
+    CheckDeletePermission -->|No| ShowErrorMsg[Show Permission Error]
+    DeletePost --> SaveData
+    SaveData --> RefreshFeed[Refresh Feed]
+    RefreshFeed --> DisplayPosts
+    LoadUserProfile --> ShowProfile
+    
+    CreateNav --> ShowCreatePost[Show Create Post Panel]
+    ShowCreatePost --> PostType{Post Type?}
+    PostType -->|Text| EnterText[Enter Text Content]
+    PostType -->|Image| SelectImage[Select Image File]
+    SelectImage --> EnterCaption[Enter Caption Optional]
+    EnterText --> ClickPost[Click Post Button]
+    EnterCaption --> ClickPost
+    ClickPost --> ValidatePost{Validate Post Content}
+    ValidatePost -->|Invalid| ShowPostError[Show Post Error]
+    ShowPostError --> ShowCreatePost
+    ValidatePost -->|Valid| CreatePost[Create Post Object]
+    CreatePost --> AddToFeed[Add Post to Feed]
+    AddToFeed --> SaveData
+    SaveData --> RefreshFeed
+    
+    ProfileNav --> ShowProfile[Show Profile Panel]
+    ShowProfile --> LoadProfile{Profile Type?}
+    LoadProfile -->|Current User| LoadCurrentProfile[Load Current User Profile]
+    LoadProfile -->|Other User| LoadOtherProfile[Load Other User Profile]
+    LoadCurrentProfile --> DisplayProfile[Display Profile Info]
+    LoadOtherProfile --> DisplayProfile
+    DisplayProfile --> ProfileAction{User Action}
+    ProfileAction -->|Edit Profile| ShowEditDialog[Show Edit Profile Dialog]
+    ProfileAction -->|Request Verification| ShowVerificationDialog[Show Verification Dialog]
+    ProfileAction -->|Follow/Unfollow| ToggleFollow[Toggle Follow Status]
+    ProfileAction -->|View Posts| ShowUserPosts[Show User's Posts]
+    ProfileAction -->|View Followers| ShowFollowers[Show Followers List]
+    ProfileAction -->|View Following| ShowFollowing[Show Following List]
+    ProfileAction -->|Ban User| CheckAdmin{Is Admin?}
+    ProfileAction -->|Verify User| CheckAdmin
+    ShowEditDialog --> UpdateProfile[Update Profile Info]
+    UpdateProfile --> SaveData
+    ShowVerificationDialog --> UploadContent[Upload Verification Content]
+    UploadContent --> SubmitRequest[Submit Verification Request]
+    SubmitRequest --> SaveData
+    ToggleFollow --> CheckPrivate{Is Private Account?}
+    CheckPrivate -->|Yes| SendRequest[Send Follow Request]
+    CheckPrivate -->|No| FollowUser[Follow User Directly]
+    SendRequest --> SaveData
+    FollowUser --> SaveData
+    CheckAdmin -->|Yes| AdminAction{Admin Action}
+    CheckAdmin -->|No| ShowErrorMsg
+    AdminAction -->|Ban| BanUser[Ban User]
+    AdminAction -->|Verify| VerifyUser[Verify User]
+    AdminAction -->|View Requests| ShowVerificationRequests[Show Verification Requests]
+    BanUser --> SaveData
+    VerifyUser --> SaveData
+    ShowVerificationRequests --> ReviewRequest[Review Request]
+    ReviewRequest --> ApproveReject{Approve or Reject?}
+    ApproveReject -->|Approve| ApproveVerification[Approve Verification]
+    ApproveReject -->|Reject| RejectVerification[Reject Verification]
+    ApproveVerification --> SaveData
+    RejectVerification --> SaveData
+    SaveData --> RefreshProfile[Refresh Profile]
+    RefreshProfile --> DisplayProfile
+    
+    SearchNav --> ShowSearch[Show Search Panel]
+    ShowSearch --> EnterQuery[Enter Search Query]
+    EnterQuery --> PerformSearch[Perform User Search]
+    PerformSearch --> DisplayResults[Display Search Results]
+    DisplayResults --> ResultAction{User Action}
+    ResultAction -->|View Profile| LoadUserProfile
+    ResultAction -->|Follow| ToggleFollow
+    ResultAction -->|Send Request| SendRequest
+    
+    LogoutNav --> ConfirmLogout{Confirm Logout?}
+    ConfirmLogout -->|No| ShowMainApp
+    ConfirmLogout -->|Yes| Logout[Logout User]
+    Logout --> ClearCurrentUser[Clear Current User]
+    ClearCurrentUser --> ShowLogin
+    
+    SaveData --> AutoSave[Auto-Save to File]
+    AutoSave --> SaveUsers[Save Users Data]
+    SaveUsers --> SavePosts[Save Posts Data]
+    SavePosts --> SaveVerification[Save Verification Requests]
+    SaveVerification --> SaveReports[Save Comment Reports]
+    
+    style Start fill:#e1f5ff
+    style ShowLogin fill:#fff4e1
+    style ShowMainApp fill:#e8f5e9
+    style ShowFeed fill:#f3e5f5
+    style ShowProfile fill:#f3e5f5
+    style ShowSearch fill:#f3e5f5
+    style SaveData fill:#ffebee
+    style ShowError fill:#ffcdd2
+    style ShowFormError fill:#ffcdd2
+    style ShowPostError fill:#ffcdd2
+    style ShowErrorMsg fill:#ffcdd2
+```
+
